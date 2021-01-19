@@ -2,6 +2,7 @@ const mysql = require('mysql');
 const inquirer = require('inquirer');
 const util = require('util');
 const { connect } = require('http2');
+const { title } = require('process');
 
 // const Employee = require('../../homework10/employee-summary/lib/Employee');
 // let manager = {
@@ -65,7 +66,7 @@ connection.connect((err) => {
   toDo();
 });
 
-const query = util.promisify(connection.query);
+connection.query = util.promisify(connection.query);
 //this function is equivalent with the async function. 
 // function toDo() {
 // inquirer.prompt(
@@ -128,7 +129,8 @@ async function toDo() {
       name: 'whatToDo',
       message: 'What would you like to do?',
       choices: ['View All Employees', 'View All employees By Department',
-        'View All employess By Manager', 'Add Employee', 'Remove Employee',
+        'View All employess By Manager', 'Add Employee', 'Remove Employee', "Add Department",
+        'Add A Role',
         'Update Employee Role', 'Update Employee Manager', 'View All Roles', 'End']
     }
   ]);
@@ -151,6 +153,15 @@ async function toDo() {
     case 'Add Employee':
       addEmployee();//done
       break;
+
+    case "Add Department":
+      addDepartment();
+      break;
+
+    case "Add A Role":
+        addRole();
+        break;
+
 
     case 'Remove Employee':
       removeEmployee();
@@ -201,8 +212,6 @@ function viewAllEmployeesByManager() {
 }
 async function addEmployee() {
 
-
-
   let query = "INSERT INTO employee SET ?"
   let { first_name, last_name, role_id, manager_id } = await inquirer.prompt([
     {
@@ -249,13 +258,73 @@ async function addEmployee() {
   )
 }
 
+async function addDepartment(){
+  let query = 'INSERT INTO department SET ?'
+  let {name } = await inquirer.prompt({
+    type:'input',
+    name:'name',
+    message:'What department do you want to add?'
+  });
+  connection.query(query, {
+    name:name
+  });
+  toDo();
+};
+
+async function addRole(){
+  let departments = await connection.query('SELECT id, name FROM department');
+  let departmentList = [];
+  let departmentMap = {};
+  let query = "INSERT INTO role SET ?";
+  // console.log(departments);
+  departments.forEach(department=>{
+    departmentList.push(`${department.name}`)
+    // departmentList.push({`${department.name}`:`${department.id}`})
+    departmentMap[department.name] = department.id;
+  });
+  console.log(departments);
+  console.log(departmentMap);
+
+  let {department} = await inquirer.prompt({
+    type: 'list',
+    name:'department',
+    message: 'Which deparment does this role belong?',
+    choices:departmentList
+  })
+  let {title, salary} = await inquirer.prompt([
+    {
+      type:'input',
+      name:'title',
+      message:'What is the name of the role?'
+  },
+  {type :'input',
+  name:'salary',
+  message:'What is the salary of the role?'
+  }
+]);
+  connection.query(query,{
+    title: title,
+    salary:salary,
+    department_id: departmentMap[department]
+  });
+  toDo();
+};
+
 async function removeEmployee(){
+  let employeeList = [];
+  let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
 
-  let list = await query('SELECT id, first_name, last_name FROM employee')
-
-
-
-
+  employees.forEach(employee => {
+    employeeList.push(`${employee.first_name} ${employee.last_name}`);
+    console.log(`${employee.first_name} ${employee.last_name}`);
+  });
+  console.log(employees);
+  let {name} = await inquirer.prompt({
+    type: "list",
+    name: "name",
+    message: "Choose which employee you want to delete:",
+    choices: employeeList
+  });
 }
 
 // async function removeEmployee() {
@@ -298,6 +367,7 @@ async function removeEmployee(){
 
 //   console.log(name);
 // }
+
 function updateEmployeeRole() {
 
 }
