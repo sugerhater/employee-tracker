@@ -1,5 +1,49 @@
 const mysql = require('mysql');
-const inquirer = require('inquirer')
+const inquirer = require('inquirer');
+// let manager = {
+//  1:"John Doe",
+//  2:"Ashley Rodriguez",
+//  3:"Malia Brown",
+//  4:"Sarah Lourd",
+//  5:"Tom Allen"
+// };
+let manager = {
+  "John Doe":1,
+  "Ashley Rodriguez":3,
+  "Malia Brown":5,
+  "Sarah Lourd":6,
+  "Tom Allen":7,
+  "none of above":"null"
+ };
+let role = [{
+  "Sales Lead":1},
+  {
+    "Salesperson":2,
+  },
+  {
+    
+    "Lead Engineer":3,
+  },
+  {
+    "Software Engineer":4,
+
+  },
+  {
+  "Accountant":5
+  },
+  {"Legal Team Lead":6},
+  {"Lawyer":7
+}];
+let roles = {
+  "Sales Lead":1,
+  "Salesperson":2,
+  "Lead Engineer":3,
+  "Software Engineer":4,
+  "Accountant":5,
+  "Legal Team Lead":6,
+  "Lawyer":7
+}
+
 var connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
@@ -12,7 +56,6 @@ connection.connect((err) => {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
   toDo();
-
 })
 //this function is equivalent with the async function. 
 // function toDo() {
@@ -123,7 +166,7 @@ async function toDo() {
 
 function viewAllEmployees() {
   console.log("choose view all employees")
-  var query = "SELECT * FROM employee";
+  let query = "SELECT * FROM employee";
   connection.query(query, function (err, res) {
     // if (err) console.log(err);
     console.table(res);
@@ -132,7 +175,7 @@ function viewAllEmployees() {
 
 };
 function viewAllEmployeesByDepartment() {
-  var query = "select first_name, last_name, department_id from employee inner JOIN  role on employee.role_id = role.id"
+  let query = "SELECT first_name, last_name, department_id FROM employee INNER JOIN role ON employee.role_id = role.id"
   connection.query(query, function (err,res){
     console.log(res)
     console.table(res)
@@ -146,11 +189,61 @@ function viewAllEmployeesByDepartment() {
 function viewAllEmployeesByManager() {
 
 }
-function addEmployee() {
+async function addEmployee() {
+  let query = "INSERT INTO employee SET ?"
+  let { first_name, last_name, role_id, manager_id} = await inquirer.prompt([
+    {
+      type:'input',
+      name:"first_name",
+      message:'what is the first_name of the new employee?'
+    },
 
+    {
+      type: 'input',
+      name:'last_name',
+      message:'What is the last name of the employee?'
+
+    },
+    
+    {
+      type:'list',
+      name:'role_id',
+      message:'What is the role of the new employee?',
+      choices:["Sales Lead","Salesperson","Lead Engineer","Software Engineer",
+      "Accountant","Legal Team Lead","Lawyer"
+    ]
+    },
+
+    {
+      type:'list',
+      name:'manager_id',
+      message:'Who is the manager of the new employee?',
+      choices:["John Doe","Ashley Rodriguez","Malia Brown","Sarah Lourd","Tom Allen","none of above"]
+    }
+  ]);
+  connection.query(
+    query, {
+      first_name: first_name,
+      last_name:  last_name,
+      role_id: roles[role_id],
+      manager_id:manager[manager_id]
+    },
+    function(err){
+      if (err) console.log(err);
+      console.log("New employee added!");
+      toDo();
+    }
+  )
 }
-function removeEmployee() {
 
+async function removeEmployee() {
+  let query = "DELETE FROM employee WHERE ?";
+  let name = await inquirer.prompt({
+    ""
+  })
+  connection.query(
+
+  )
 }
 function updateEmployeeRole() {
 
