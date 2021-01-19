@@ -141,7 +141,7 @@ async function toDo() {
       // renderEmployeeList();
       break;
 
-    case 'View All employees By Department':
+    case 'View All employees By Department'://done
       viewAllEmployeesByDepartment();
       break;
 
@@ -158,9 +158,9 @@ async function toDo() {
       addDepartment();
       break;
 
-    case "Add A Role":
-        addRole();
-        break;
+    case "Add A Role"://done
+      addRole();
+      break;
 
 
     case 'Remove Employee':
@@ -258,26 +258,26 @@ async function addEmployee() {
   )
 }
 
-async function addDepartment(){
+async function addDepartment() {
   let query = 'INSERT INTO department SET ?'
-  let {name } = await inquirer.prompt({
-    type:'input',
-    name:'name',
-    message:'What department do you want to add?'
+  let { name } = await inquirer.prompt({
+    type: 'input',
+    name: 'name',
+    message: 'What department do you want to add?'
   });
   connection.query(query, {
-    name:name
+    name: name
   });
   toDo();
 };
 
-async function addRole(){
+async function addRole() {
   let departments = await connection.query('SELECT id, name FROM department');
   let departmentList = [];
   let departmentMap = {};
   let query = "INSERT INTO role SET ?";
   // console.log(departments);
-  departments.forEach(department=>{
+  departments.forEach(department => {
     departmentList.push(`${department.name}`)
     // departmentList.push({`${department.name}`:`${department.id}`})
     departmentMap[department.name] = department.id;
@@ -285,46 +285,51 @@ async function addRole(){
   console.log(departments);
   console.log(departmentMap);
 
-  let {department} = await inquirer.prompt({
+  let { department } = await inquirer.prompt({
     type: 'list',
-    name:'department',
+    name: 'department',
     message: 'Which deparment does this role belong?',
-    choices:departmentList
+    choices: departmentList
   })
-  let {title, salary} = await inquirer.prompt([
+  let { title, salary } = await inquirer.prompt([
     {
-      type:'input',
-      name:'title',
-      message:'What is the name of the role?'
-  },
-  {type :'input',
-  name:'salary',
-  message:'What is the salary of the role?'
-  }
-]);
-  connection.query(query,{
+      type: 'input',
+      name: 'title',
+      message: 'What is the name of the role?'
+    },
+    {
+      type: 'input',
+      name: 'salary',
+      message: 'What is the salary of the role?'
+    }
+  ]);
+  connection.query(query, {
     title: title,
-    salary:salary,
+    salary: salary,
     department_id: departmentMap[department]
   });
   toDo();
 };
 
-async function removeEmployee(){
+async function removeEmployee() {
   let employeeList = [];
+  let employeeMap = {};
   let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
-
+  let query = 'DELETE FROM employee WHERE id = ? ';
   employees.forEach(employee => {
     employeeList.push(`${employee.first_name} ${employee.last_name}`);
-    console.log(`${employee.first_name} ${employee.last_name}`);
+    // console.log(`${employee.first_name} ${employee.last_name}`);
+    employeeMap[`${employee.first_name} ${employee.last_name}`] = employee.id;
   });
-  console.log(employees);
-  let {name} = await inquirer.prompt({
+  // console.log(employees);
+  let { name } = await inquirer.prompt({
     type: "list",
     name: "name",
     message: "Choose which employee you want to delete:",
     choices: employeeList
   });
+  await connection.query(query,employeeMap[name]);
+  toDo();
 }
 
 // async function removeEmployee() {
@@ -351,7 +356,7 @@ async function removeEmployee(){
 //       let query = "DELETE FROM employee WHERE ?";
 
 //       connection.query("DELETE FROM employee WHERE ?",``)
-      
+
 //     }
 //     ) ;
 
@@ -376,7 +381,7 @@ function updateEmployeeManager() {
 }
 function viewAllRoles() {
   connection.query(
-    'SELECT * FROM role',function (err, res){
+    'SELECT * FROM role', function (err, res) {
       if (err) throw err;
       console.table(res);
 
@@ -402,7 +407,7 @@ async function renderEmployeeList() {
       console.log(employeeList);
       return employeeList;
     }
-    ) ;
+  );
 }
 
 // let list = renderEmployeeList().then;
