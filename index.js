@@ -1,5 +1,9 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const util = require('util');
+const { connect } = require('http2');
+
+// const Employee = require('../../homework10/employee-summary/lib/Employee');
 // let manager = {
 //  1:"John Doe",
 //  2:"Ashley Rodriguez",
@@ -8,40 +12,42 @@ const inquirer = require('inquirer');
 //  5:"Tom Allen"
 // };
 let manager = {
-  "John Doe":1,
-  "Ashley Rodriguez":3,
-  "Malia Brown":5,
-  "Sarah Lourd":6,
-  "Tom Allen":7,
-  "none of above":"null"
- };
+  "John Doe": 1,
+  "Ashley Rodriguez": 3,
+  "Malia Brown": 5,
+  "Sarah Lourd": 6,
+  "Tom Allen": 7,
+  "none of above": "null"
+};
 let role = [{
-  "Sales Lead":1},
-  {
-    "Salesperson":2,
-  },
-  {
-    
-    "Lead Engineer":3,
-  },
-  {
-    "Software Engineer":4,
+  "Sales Lead": 1
+},
+{
+  "Salesperson": 2,
+},
+{
 
-  },
-  {
-  "Accountant":5
-  },
-  {"Legal Team Lead":6},
-  {"Lawyer":7
+  "Lead Engineer": 3,
+},
+{
+  "Software Engineer": 4,
+
+},
+{
+  "Accountant": 5
+},
+{ "Legal Team Lead": 6 },
+{
+  "Lawyer": 7
 }];
 let roles = {
-  "Sales Lead":1,
-  "Salesperson":2,
-  "Lead Engineer":3,
-  "Software Engineer":4,
-  "Accountant":5,
-  "Legal Team Lead":6,
-  "Lawyer":7
+  "Sales Lead": 1,
+  "Salesperson": 2,
+  "Lead Engineer": 3,
+  "Software Engineer": 4,
+  "Accountant": 5,
+  "Legal Team Lead": 6,
+  "Lawyer": 7
 }
 
 var connection = mysql.createConnection({
@@ -55,8 +61,11 @@ var connection = mysql.createConnection({
 connection.connect((err) => {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
+  // renderEmployeeList();
   toDo();
-})
+});
+
+const query = util.promisify(connection.query);
 //this function is equivalent with the async function. 
 // function toDo() {
 // inquirer.prompt(
@@ -75,36 +84,36 @@ connection.connect((err) => {
 //         console.log("1111");
 //         viewAllEmployees();
 //         break;
-  
+
 //       case 'View All employees By Department':
 //         viewAllEmployeesByDepartment();
 //         break;
-  
+
 //       case 'View All employess By Manager':
 //         viewAllEmployeesByManager();
-  
+
 //         break;
-  
+
 //       case 'Add Employee':
 //         addEmployee();
 //         break;
-  
+
 //       case 'Remove Employee':
 //         removeEmployee();
 //         break;
-  
+
 //       case 'Update Employee Role':
 //         updateEmployeeRole();
 //         break;
-  
+
 //       case 'Update Employee Manager':
 //         updateEmployeeManager();
 //         break;
-  
+
 //       case 'View All Employees':
 //         viewAllRoles();
 //         break;
-  
+
 //       case 'End':
 //         end();
 //         break;
@@ -113,11 +122,11 @@ connection.connect((err) => {
 
 
 async function toDo() {
-  let {whatToDo} = await inquirer.prompt([
+  let { whatToDo } = await inquirer.prompt([
     {
       type: 'list',
       name: 'whatToDo',
-      message: 'What wyould you like to do?',
+      message: 'What would you like to do?',
       choices: ['View All Employees', 'View All employees By Department',
         'View All employess By Manager', 'Add Employee', 'Remove Employee',
         'Update Employee Role', 'Update Employee Manager', 'View All Roles', 'End']
@@ -126,7 +135,8 @@ async function toDo() {
 
   switch (whatToDo) {
     case 'View All Employees':
-      viewAllEmployees();
+      viewAllEmployees();//done
+      // renderEmployeeList();
       break;
 
     case 'View All employees By Department':
@@ -139,7 +149,7 @@ async function toDo() {
       break;
 
     case 'Add Employee':
-      addEmployee();
+      addEmployee();//done
       break;
 
     case 'Remove Employee':
@@ -147,14 +157,14 @@ async function toDo() {
       break;
 
     case 'Update Employee Role':
-      updateEmployeeRole();
+      updateEmployeeRole(); //need to get done
       break;
 
     case 'Update Employee Manager':
       updateEmployeeManager();
       break;
 
-    case 'View All Employees':
+    case 'View All Roles':
       viewAllRoles();
       break;
 
@@ -176,13 +186,13 @@ function viewAllEmployees() {
 };
 function viewAllEmployeesByDepartment() {
   let query = "SELECT first_name, last_name, department_id FROM employee INNER JOIN role ON employee.role_id = role.id"
-  connection.query(query, function (err,res){
+  connection.query(query, function (err, res) {
     console.log(res)
     console.table(res)
-    for (let i = 0; i < res.length; i++){
+    for (let i = 0; i < res.length; i++) {
       console.log(res[i].first_name + " | " + res[i].last_name + " | " + res[i].department_id);
     }
-  toDo();
+    toDo();
   });
 
 }
@@ -190,45 +200,48 @@ function viewAllEmployeesByManager() {
 
 }
 async function addEmployee() {
+
+
+
   let query = "INSERT INTO employee SET ?"
-  let { first_name, last_name, role_id, manager_id} = await inquirer.prompt([
+  let { first_name, last_name, role_id, manager_id } = await inquirer.prompt([
     {
-      type:'input',
-      name:"first_name",
-      message:'what is the first_name of the new employee?'
+      type: 'input',
+      name: "first_name",
+      message: 'what is the first_name of the new employee?'
     },
 
     {
       type: 'input',
-      name:'last_name',
-      message:'What is the last name of the employee?'
+      name: 'last_name',
+      message: 'What is the last name of the employee?'
 
-    },
-    
-    {
-      type:'list',
-      name:'role_id',
-      message:'What is the role of the new employee?',
-      choices:["Sales Lead","Salesperson","Lead Engineer","Software Engineer",
-      "Accountant","Legal Team Lead","Lawyer"
-    ]
     },
 
     {
-      type:'list',
-      name:'manager_id',
-      message:'Who is the manager of the new employee?',
-      choices:["John Doe","Ashley Rodriguez","Malia Brown","Sarah Lourd","Tom Allen","none of above"]
+      type: 'list',
+      name: 'role_id',
+      message: 'What is the role of the new employee?',
+      choices: ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer",
+        "Accountant", "Legal Team Lead", "Lawyer"
+      ]
+    },
+
+    {
+      type: 'list',
+      name: 'manager_id',
+      message: 'Who is the manager of the new employee?',
+      choices: ["John Doe", "Ashley Rodriguez", "Malia Brown", "Sarah Lourd", "Tom Allen", "none of above"]
     }
   ]);
   connection.query(
     query, {
-      first_name: first_name,
-      last_name:  last_name,
-      role_id: roles[role_id],
-      manager_id:manager[manager_id]
-    },
-    function(err){
+    first_name: first_name,
+    last_name: last_name,
+    role_id: roles[role_id],
+    manager_id: manager[manager_id]
+  },
+    function (err) {
       if (err) console.log(err);
       console.log("New employee added!");
       toDo();
@@ -236,15 +249,55 @@ async function addEmployee() {
   )
 }
 
-async function removeEmployee() {
-  let query = "DELETE FROM employee WHERE ?";
-  let name = await inquirer.prompt({
-    ""
-  })
-  connection.query(
+async function removeEmployee(){
 
-  )
+  let list = await query('SELECT id, first_name, last_name FROM employee')
+
+
+
+
 }
+
+// async function removeEmployee() {
+//   let employeeList;
+
+//   connection.query(
+//     'SELECT id, first_name, last_name FROM employee',
+//     async function (err, res) {
+//       if (err) throw err;
+//       console.log(res);
+//       res.forEach(employee => {
+//         employeeList.push(`${employee.first_name} ${employee.last_name}`);
+//         console.log(`${employee.first_name} ${employee.last_name}`);
+//       });
+//       // console.log(employeeList);
+//       // return employeeList;
+
+//       let {name} = await inquirer.prompt({
+//         type: "list",
+//         name: "name",
+//         message: "Choose which employee you want to delete:",
+//         choices: employeeList
+//       });
+//       let query = "DELETE FROM employee WHERE ?";
+
+//       connection.query("DELETE FROM employee WHERE ?",``)
+      
+//     }
+//     ) ;
+
+
+//   // employeeList = await renderEmployeeList();
+//   // console.log(employeeList);
+//   let {name} = await inquirer.prompt({
+//     type: "list",
+//     name: "name",
+//     message: "Choose which employee you want to delete:",
+//     choices: employeeList
+//   });
+
+//   console.log(name);
+// }
 function updateEmployeeRole() {
 
 }
@@ -252,9 +305,35 @@ function updateEmployeeManager() {
 
 }
 function viewAllRoles() {
+  connection.query(
+    'SELECT * FROM role',function (err, res){
+      if (err) throw err;
+      console.table(res);
 
+    }
+  )
 }
 
 function end() {
 
 };
+//---------------addition functions which work for function above-----------------//
+async function renderEmployeeList() {
+  let employeeList = [];
+  connection.query(
+    'SELECT id, first_name, last_name FROM employee',
+    function (err, res) {
+      if (err) throw err;
+      console.log(res);
+      res.forEach(employee => {
+        employeeList.push(`${employee.first_name} ${employee.last_name}`);
+        console.log(`${employee.first_name} ${employee.last_name}`);
+      });
+      console.log(employeeList);
+      return employeeList;
+    }
+    ) ;
+}
+
+// let list = renderEmployeeList().then;
+// console.log(list);
