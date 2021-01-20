@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const util = require('util');
 const { connect } = require('http2');
 const { title } = require('process');
+// const { writeFile } = require('fs');
 
 // const Employee = require('../../homework10/employee-summary/lib/Employee');
 // let manager = {
@@ -163,7 +164,7 @@ async function toDo() {
       break;
 
 
-    case 'Remove Employee':
+    case 'Remove Employee'://done
       removeEmployee();
       break;
 
@@ -312,23 +313,22 @@ async function addRole() {
 };
 
 async function removeEmployee() {
-  let employeeList = [];
-  let employeeMap = {};
   let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
-  let query = 'DELETE FROM employee WHERE id = ? ';
-  employees.forEach(employee => {
-    employeeList.push(`${employee.first_name} ${employee.last_name}`);
-    // console.log(`${employee.first_name} ${employee.last_name}`);
-    employeeMap[`${employee.first_name} ${employee.last_name}`] = employee.id;
+  
+  const employeeList = employees.map(employee => {
+    return `${employee.id}: ${employee.first_name} ${employee.last_name}`;
   });
-  // console.log(employees);
+
   let { name } = await inquirer.prompt({
     type: "list",
     name: "name",
     message: "Choose which employee you want to delete:",
     choices: employeeList
   });
-  await connection.query(query,employeeMap[name]);
+
+  const id = name.split(":")[0];
+  
+  await connection.query('DELETE FROM employee WHERE id = ?', id);
   toDo();
 }
 
@@ -373,9 +373,18 @@ async function removeEmployee() {
 //   console.log(name);
 // }
 
-function updateEmployeeRole() {
-
-}
+// function updateEmployeeRole() {
+//   let employeeList = [];
+//   let employeeMap = {};
+//   let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
+//   let query = 'UPDATE employee SET ? WHERE id = ? ';
+//   employees.forEach(employee => {
+//     employeeList.push(`${employee.first_name} ${employee.last_name}`);
+//     // console.log(`${employee.first_name} ${employee.last_name}`);
+//     employeeMap[`${employee.first_name} ${employee.last_name}`] = employee.id;
+//   });
+//   let {name, role }
+// }
 function updateEmployeeManager() {
 
 }
