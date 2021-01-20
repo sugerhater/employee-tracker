@@ -123,11 +123,14 @@ async function toDo() {
       name: 'whatToDo',
       message: 'What would you like to do?',
       choices: ['View All Employees', 'View All employees By Department',
-        'View All employess By Manager', 'Add Employee', 'Remove Employee', "Add Department",
+         'Add Employee', 'Remove Employee', "Add Department",
         'Add A Role',
-        'Update Employee Role', 'Update Employee Manager', 'View All Roles', 'End']
+        'Update Employee Role',  'View All Roles', 'End']
     }
   ]);
+
+  // 'View All employess By Manager',
+  // 'Update Employee Manager',
 
   switch (whatToDo) {
     case 'View All Employees':
