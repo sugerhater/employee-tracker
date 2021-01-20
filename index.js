@@ -6,13 +6,6 @@ const { title } = require('process');
 // const { writeFile } = require('fs');
 
 // const Employee = require('../../homework10/employee-summary/lib/Employee');
-// let manager = {
-//  1:"John Doe",
-//  2:"Ashley Rodriguez",
-//  3:"Malia Brown",
-//  4:"Sarah Lourd",
-//  5:"Tom Allen"
-// };
 let manager = {
   "John Doe": 1,
   "Ashley Rodriguez": 3,
@@ -42,15 +35,15 @@ let role = [{
 {
   "Lawyer": 7
 }];
-let roles = {
-  "Sales Lead": 1,
-  "Salesperson": 2,
-  "Lead Engineer": 3,
-  "Software Engineer": 4,
-  "Accountant": 5,
-  "Legal Team Lead": 6,
-  "Lawyer": 7
-}
+// let roles = {
+//   "Sales Lead": 1,
+//   "Salesperson": 2,
+//   "Lead Engineer": 3,
+//   "Software Engineer": 4,
+//   "Accountant": 5,
+//   "Legal Team Lead": 6,
+//   "Lawyer": 7
+// }
 
 var connection = mysql.createConnection({
   host: 'localhost',
@@ -327,64 +320,45 @@ async function removeEmployee() {
   });
 
   const id = name.split(":")[0];
-  
+
   await connection.query('DELETE FROM employee WHERE id = ?', id);
   toDo();
 }
 
-// async function removeEmployee() {
-//   let employeeList;
+async function updateEmployeeRole() {
+  // let employeeMap = {};
+  let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
+  
+  let employeeList = employees.map(employee =>{
+    return `${employee.id}:${employee.first_name} ${employee.last_name}`;
+  });
+  let roles = await connection.query('SELECT * FROM role')
+  
+  let rolesList = roles.map(role =>{
+    return `${role.id}: ${role.title}, ${role.salary}, department ID ${role.department_id}`
+  } );
 
-//   connection.query(
-//     'SELECT id, first_name, last_name FROM employee',
-//     async function (err, res) {
-//       if (err) throw err;
-//       console.log(res);
-//       res.forEach(employee => {
-//         employeeList.push(`${employee.first_name} ${employee.last_name}`);
-//         console.log(`${employee.first_name} ${employee.last_name}`);
-//       });
-//       // console.log(employeeList);
-//       // return employeeList;
-
-//       let {name} = await inquirer.prompt({
-//         type: "list",
-//         name: "name",
-//         message: "Choose which employee you want to delete:",
-//         choices: employeeList
-//       });
-//       let query = "DELETE FROM employee WHERE ?";
-
-//       connection.query("DELETE FROM employee WHERE ?",``)
-
-//     }
-//     ) ;
-
-
-//   // employeeList = await renderEmployeeList();
-//   // console.log(employeeList);
-//   let {name} = await inquirer.prompt({
-//     type: "list",
-//     name: "name",
-//     message: "Choose which employee you want to delete:",
-//     choices: employeeList
-//   });
-
-//   console.log(name);
-// }
-
-// function updateEmployeeRole() {
-//   let employeeList = [];
-//   let employeeMap = {};
-//   let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
-//   let query = 'UPDATE employee SET ? WHERE id = ? ';
-//   employees.forEach(employee => {
-//     employeeList.push(`${employee.first_name} ${employee.last_name}`);
-//     // console.log(`${employee.first_name} ${employee.last_name}`);
-//     employeeMap[`${employee.first_name} ${employee.last_name}`] = employee.id;
-//   });
-//   let {name, role }
-// }
+  let {name, role } = await inquirer.prompt([{
+    type:'list',
+    name:'name',
+    message:'Chooese employee you want to update',
+    choices: employeeList
+  },
+  {
+    type:'list',
+    name:'role',
+    message:'Choose the new role of the employee:',
+    choices:rolesList
+  }
+])
+  let nameId = name.split(":")[0];
+  let roleId = role.split(":")[0];
+  console.log(nameId);
+  console.log(roleId);
+  let query = 'UPDATE employee SET ? WHERE ? ';
+  await connection.query(query,[{role_id:roleId},{id:nameId}]);
+  toDo();
+}
 function updateEmployeeManager() {
 
 }
@@ -393,13 +367,13 @@ function viewAllRoles() {
     'SELECT * FROM role', function (err, res) {
       if (err) throw err;
       console.table(res);
-
+      toDo();
     }
   )
 }
 
 function end() {
-
+  connection.end();
 };
 //---------------addition functions which work for function above-----------------//
 async function renderEmployeeList() {
