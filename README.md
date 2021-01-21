@@ -2,6 +2,7 @@
 ![badge](https://img.shields.io/badge/license-MIT-brightgreen)
 
 A command line application Employee tracker for managing a company's employees. For example, add an employee, view all employees, remove an employees, ect..
+![homework12](https://user-images.githubusercontent.com/71996574/105406938-18726080-5bfb-11eb-8b53-21b5a856f4da.gif)
 
 ## Installlation & Usage
 1. Clone repo into local.
