@@ -3,47 +3,17 @@ const inquirer = require('inquirer');
 const util = require('util');
 const { connect } = require('http2');
 const { title } = require('process');
-// const { writeFile } = require('fs');
 
-// const Employee = require('../../homework10/employee-summary/lib/Employee');
-let manager = {
-  "John Doe": 1,
-  "Ashley Rodriguez": 3,
-  "Malia Brown": 5,
-  "Sarah Lourd": 6,
-  "Tom Allen": 7,
-  "none of above": "null"
-};
-let role = [{
-  "Sales Lead": 1
-},
-{
-  "Salesperson": 2,
-},
-{
+let figlet = require('figlet');
 
-  "Lead Engineer": 3,
-},
-{
-  "Software Engineer": 4,
+figlet = util.promisify(figlet);
 
-},
-{
-  "Accountant": 5
-},
-{ "Legal Team Lead": 6 },
-{
-  "Lawyer": 7
-}];
-// let roles = {
-//   "Sales Lead": 1,
-//   "Salesperson": 2,
-//   "Lead Engineer": 3,
-//   "Software Engineer": 4,
-//   "Accountant": 5,
-//   "Legal Team Lead": 6,
-//   "Lawyer": 7
-// }
+async function print(data) {
+  let toPrint = await figlet(data)
+  console.log(toPrint);
+}
+
+print('Employee\n\nManager');
 
 var connection = mysql.createConnection({
   host: 'localhost',
@@ -55,7 +25,7 @@ var connection = mysql.createConnection({
 
 connection.connect((err) => {
   if (err) throw err;
-  console.log("connected as id " + connection.threadId);
+  // console.log("connected as id " + connection.threadId);
   // renderEmployeeList();
   toDo();
 });
@@ -123,9 +93,9 @@ async function toDo() {
       name: 'whatToDo',
       message: 'What would you like to do?',
       choices: ['View All Employees', 'View All employees By Department',
-         'Add Employee', 'Remove Employee', "Add Department",
+        'Add Employee', 'Remove Employee', "Add Department",
         'Add A Role',
-        'Update Employee Role',  'View All Roles', 'End']
+        'Update Employee Role', 'View All Roles', 'End']
     }
   ]);
 
@@ -310,7 +280,7 @@ async function addRole() {
 
 async function removeEmployee() {
   let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
-  
+
   const employeeList = employees.map(employee => {
     return `${employee.id}: ${employee.first_name} ${employee.last_name}`;
   });
@@ -331,35 +301,35 @@ async function removeEmployee() {
 async function updateEmployeeRole() {
   // let employeeMap = {};
   let employees = await connection.query('SELECT id, first_name, last_name FROM employee')
-  
-  let employeeList = employees.map(employee =>{
+
+  let employeeList = employees.map(employee => {
     return `${employee.id}:${employee.first_name} ${employee.last_name}`;
   });
   let roles = await connection.query('SELECT * FROM role')
-  
-  let rolesList = roles.map(role =>{
-    return `${role.id}: ${role.title}, ${role.salary}, department ID ${role.department_id}`
-  } );
 
-  let {name, role } = await inquirer.prompt([{
-    type:'list',
-    name:'name',
-    message:'Chooese employee you want to update',
+  let rolesList = roles.map(role => {
+    return `${role.id}: ${role.title}, ${role.salary}, department ID ${role.department_id}`
+  });
+
+  let { name, role } = await inquirer.prompt([{
+    type: 'list',
+    name: 'name',
+    message: 'Chooese employee you want to update',
     choices: employeeList
   },
   {
-    type:'list',
-    name:'role',
-    message:'Choose the new role of the employee:',
-    choices:rolesList
+    type: 'list',
+    name: 'role',
+    message: 'Choose the new role of the employee:',
+    choices: rolesList
   }
-])
+  ])
   let nameId = name.split(":")[0];
   let roleId = role.split(":")[0];
   console.log(nameId);
   console.log(roleId);
   let query = 'UPDATE employee SET ? WHERE ? ';
-  await connection.query(query,[{role_id:roleId},{id:nameId}]);
+  await connection.query(query, [{ role_id: roleId }, { id: nameId }]);
   toDo();
 }
 function updateEmployeeManager() {
@@ -395,6 +365,7 @@ async function renderEmployeeList() {
     }
   );
 }
+print('Employee\n\nManager');
 
-// let list = renderEmployeeList().then;
-// console.log(list);
+  // let list = renderEmployeeList().then;
+  // console.log(list);
