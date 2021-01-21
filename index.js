@@ -8,12 +8,16 @@ let figlet = require('figlet');
 
 figlet = util.promisify(figlet);
 
+async function start(){
+  await print('Employee\n\nManager');
+  await toDo();
+}
+
 async function print(data) {
   let toPrint = await figlet(data)
   console.log(toPrint);
 }
 
-print('Employee\n\nManager');
 
 var connection = mysql.createConnection({
   host: 'localhost',
@@ -27,7 +31,7 @@ connection.connect((err) => {
   if (err) throw err;
   // console.log("connected as id " + connection.threadId);
   // renderEmployeeList();
-  toDo();
+  start()
 });
 
 connection.query = util.promisify(connection.query);
@@ -179,8 +183,18 @@ function viewAllEmployeesByManager() {
 }
 async function addEmployee() {
 
+  
+  let roles = await connection.query('SELECT * FROM role')
+  let managers = await connection.query('SELECT * FROM employee WHERE manager_id is null')
+  let managersList = managers.map(manager =>{
+    return `${manager.id}: ${manager.first_name} ${manager.last_name}`
+  })
+
+  let rolesList = roles.map(role => {
+    return `${role.id}: ${role.title}, ${role.salary}, department ID ${role.department_id}`
+  });
   let query = "INSERT INTO employee SET ?"
-  let { first_name, last_name, role_id, manager_id } = await inquirer.prompt([
+  let { first_name, last_name, role, manager } = await inquirer.prompt([
     {
       type: 'input',
       name: "first_name",
@@ -196,26 +210,26 @@ async function addEmployee() {
 
     {
       type: 'list',
-      name: 'role_id',
+      name: 'role',
       message: 'What is the role of the new employee?',
-      choices: ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer",
-        "Accountant", "Legal Team Lead", "Lawyer"
-      ]
+      choices: rolesList
     },
 
     {
       type: 'list',
-      name: 'manager_id',
+      name: 'manager',
       message: 'Who is the manager of the new employee?',
-      choices: ["John Doe", "Ashley Rodriguez", "Malia Brown", "Sarah Lourd", "Tom Allen", "none of above"]
+      choices: managersList
     }
   ]);
+  let roleId = role.split(":")[0];
+  let managerId = manager.split(":")[0];
   connection.query(
     query, {
     first_name: first_name,
     last_name: last_name,
-    role_id: roles[role_id],
-    manager_id: manager[manager_id]
+    role_id: roleId,
+    manager_id: managerId
   },
     function (err) {
       if (err) console.log(err);
@@ -365,7 +379,8 @@ async function renderEmployeeList() {
     }
   );
 }
-print('Employee\n\nManager');
 
   // let list = renderEmployeeList().then;
   // console.log(list);
+
+ 
